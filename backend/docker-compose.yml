@@ -1,0 +1,99 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: strata_api
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      - DB_HOST=postgres
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  celery_worker:
+    build: .
+    container_name: strata_celery_worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      - DB_HOST=postgres
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+    command: celery -A app.tasks.celery_app worker --loglevel=info --queues=default,dead_letter --concurrency=4
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  celery_beat:
+    build: .
+    container_name: strata_celery_beat
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: strata_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: strata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: strata_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: strata_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:

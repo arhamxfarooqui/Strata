@@ -1,9 +1,0 @@
-{
-  "name": "Tester",
-  "email": "test@axios.com",
-  "password": "password123",
-  "college_id": "AX101",
-  "codeforces_handle": "tourist",
-  "github_handle": "tester",
-  "wings": ["CP"]
-}

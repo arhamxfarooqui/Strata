@@ -1,9 +1,0 @@
-{
-  "name": "Stage3 Tester",
-  "email": "stage3@axios.com",
-  "password": "password123",
-  "college_id": "STG3",
-  "codeforces_handle": "tourist",
-  "github_handle": "tester",
-  "wings": ["CP", "Web", "ML"]
-}
