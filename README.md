@@ -1,6 +1,6 @@
-# AXIOS-GO (Strata 2.0): The Centralized Technical Nexus 🌐
+# Strata: The Centralized Technical Nexus 🌐
 
-AXIOS-GO is a production-grade, AI-driven platform designed to centralize technical growth. It bridges the gap between competitive programming, software engineering, and AI research through a **Decoupled Agentic Architecture**. 
+Strata is a production-grade, AI-driven platform designed to centralize technical growth. It bridges the gap between competitive programming, software engineering, and AI research through a **Decoupled Agentic Architecture**. 
 
 The backend has recently been completely re-architected in Python (FastAPI + Celery) to leverage the rich AI ecosystem, massive asynchronous scalability, and background intelligence.
 
@@ -46,7 +46,7 @@ graph TD
 
 ## 🏛️ System Design & Architecture
 
-AXIOS-GO is built on the principle of **Agentic Orchestration**. It doesn't just process requests; it reasons, plans, and remembers. The backend has been completely rewritten in Python to leverage the rich AI ecosystem and asynchronous task processing.
+Strata is built on the principle of **Agentic Orchestration**. It doesn't just process requests; it reasons, plans, and remembers. The backend has been completely rewritten in Python to leverage the rich AI ecosystem and asynchronous task processing.
 
 ### 1. Global High-Level Flow
 The system heavily separates real-time user interactions from high-latency data synchronization and AI reasoning. Real-time requests are handled instantly, while background tasks (like fetching Codeforces submissions or updating GitHub stats) are offloaded to RabbitMQ and Celery.
@@ -128,7 +128,7 @@ Developers can submit a Pull Request URL. The backend fetches the raw diff via t
 
 ## 🧠 AI Intelligence Layer: The Orchestrator
 
-AXIOS-GO utilizes a multi-model routing strategy to optimize for reasoning depth and response speed, dynamically switching between DeepSeek and Groq based on task complexity.
+Strata utilizes a multi-model routing strategy to optimize for reasoning depth and response speed, dynamically switching between DeepSeek and Groq based on task complexity.
 
 ### 1. Task Decomposition Flow
 When a user asks a complex question (e.g., "How do I optimize my DP for this specific CF problem?"), the **Orchestrator** takes over.
@@ -158,10 +158,10 @@ The **Shadow Memory** is a persistent layer that tracks user proficiency (1-10) 
 
 ---
 
-## 📈 The Axios Rating Algorithm
+## 📈 The Strata Rating Algorithm
 
-The Axios Rating is a unified metric that rewards cross-disciplinary excellence. It prevents developers from being "one-trick ponies" by enforcing growth across all domains.
-$$AxiosRating = (CF_{Rating} \times 0.5) + (CF_{Solved} \times 5) + (GH_{Repos} \times 20) + (GH_{PRs} \times 50)$$
+The Strata Rating is a unified metric that rewards cross-disciplinary excellence. It prevents developers from being "one-trick ponies" by enforcing growth across all domains.
+$$StrataRating = (CF_{Rating} \times 0.5) + (CF_{Solved} \times 5) + (GH_{Repos} \times 20) + (GH_{PRs} \times 50)$$
 - **Base Logic**: Codeforces Rating (Algorithm efficiency).
 - **Consistency**: Problems Solved (Daily persistence).
 - **Engineering Output**: GitHub Repositories (Architecture).
@@ -211,4 +211,4 @@ A user requests a roadmap for "Frontend + ML". The **Orchestrator** generates a 
 - **Persona**: The AI behaves as an elite technical mentor—concise, encouraging, and logic-focused.
 
 ---
-© 2026 AXIOS Technical Nexus. PHASE 2 (STRATA) ONLINE.
+© 2026 Strata Technical Nexus. PHASE 2 (STRATA) ONLINE.
