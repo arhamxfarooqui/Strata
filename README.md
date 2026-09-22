@@ -15,17 +15,16 @@ graph TD
         Framer[Framer Motion]
     end
 
-    subgraph "Backend (The Nexus)"
-        Go[Go / Gin]
-        GORM[GORM]
-        Cron[robfig/cron]
+    subgraph "Backend (Strata - Python Nexus)"
+        FastAPI[FastAPI]
+        SQLA[SQLAlchemy 2.0 (Async)]
+        Celery[Celery Workers & Beat]
     end
 
     subgraph "Infrastructure"
         Postgres[(PostgreSQL)]
         Redis[(Redis)]
         RMQ[RabbitMQ]
-        Docker[Docker Compose]
     end
 
     subgraph "AI Layer"
@@ -33,46 +32,49 @@ graph TD
         Groq[Groq Llama 3.3]
     end
 
-    React --> Go
-    Go --> Postgres
-    Go --> Redis
-    Go --> RMQ
-    Go --> DeepSeek
-    Go --> Groq
+    React --> FastAPI
+    FastAPI --> Postgres
+    FastAPI --> Redis
+    FastAPI --> RMQ
+    FastAPI --> DeepSeek
+    FastAPI --> Groq
+    Celery --> RMQ
+    Celery --> Postgres
 ```
 
 ## 🏛️ System Design & Architecture
 
-AXIOS-GO is built on the principle of **Agentic Orchestration**. It doesn't just process requests; it reasons, plans, and remembers.
+AXIOS-GO is built on the principle of **Agentic Orchestration**. It doesn't just process requests; it reasons, plans, and remembers. The backend has been completely rewritten in Python to leverage the rich AI ecosystem and asynchronous task processing.
 
 ### 1. Global High-Level Flow
 The system separates real-time user interactions from high-latency data synchronization and AI reasoning.
 
 ```mermaid
 graph TD
-    User((User)) -->|HTTPS/JWT| Gin[Gin API Server]
-    Gin -->|Sync| DB[(PostgreSQL)]
-    Gin -->|Cache| Redis[(Redis)]
+    User((User)) -->|HTTPS/JWT| FastAPI[FastAPI Server]
+    FastAPI -->|Async DB| DB[(PostgreSQL)]
+    FastAPI -->|Cache| Redis[(Redis)]
     
     subgraph "The Wings (Modules)"
         CP[CP Wing - Competitive Programming]
         Dev[Dev Wing - Software Engineering]
         ML[ML Wing - AI/ML Research]
+        IS[InfoSec Wing]
     end
     
-    Gin --> CP
-    Gin --> Dev
-    Gin --> ML
+    FastAPI --> CP
+    FastAPI --> Dev
+    FastAPI --> ML
+    FastAPI --> IS
 
     subgraph "Background Intelligence"
-        Cron[Cron Engine] -->|4h| CF_Sync[Codeforces Sync]
-        Cron -->|24h| Rating_Sync[Axios Rating Sync]
-        RMQ[RabbitMQ] -->|Async Task| Worker[Background Workers]
-        CF_Sync --> RMQ
+        Beat[Celery Beat] -->|Scheduled Tasks| Celery[Celery Workers]
+        RMQ[RabbitMQ] -->|Message Broker| Celery
+        Celery -->|Sync CF/Rating| DB
     end
 
     subgraph "AI Intelligence Layer"
-        Gin -->|Task| Orch[AI Orchestrator]
+        FastAPI -->|Route Tasks| Orch[AI Orchestrator]
         Orch -->|Shadow Memory| DB
         Orch -->|Decomposition| DeepSeek[DeepSeek-Reasoner]
         Orch -->|Execution| Groq[Groq Llama 3.3]
@@ -91,15 +93,14 @@ This flow ensures that every failed submission on Codeforces is tracked and pres
 ```mermaid
 sequenceDiagram
     participant CF as Codeforces API
-    participant Cron as Cron Worker
-    participant RMQ as RabbitMQ
+    participant Celery as Celery Worker
+    participant RMQ as RabbitMQ Broker
     participant DB as PostgreSQL
     
-    Cron->>CF: Fetch last 20 submissions
-    CF-->>Cron: Submissions Data
-    Cron->>Cron: Filter Non-OK Verdicts
-    Cron->>RMQ: Push Sync Task
-    RMQ->>DB: Upsert into UpsolveTasks (Deduplicated)
+    Celery->>CF: Fetch last 20 submissions
+    CF-->>Celery: Submissions Data
+    Celery->>Celery: Filter Non-OK Verdicts
+    Celery->>DB: Upsert into UpsolveTasks
     Note over DB: Task status = 'pending'
 ```
 
@@ -120,9 +121,6 @@ The system performs a quantitative analysis of GitHub repositories based on:
 
 ### 2. PR AI Audit
 Developers can submit a Pull Request URL. The backend fetches the raw diff via the GitHub API and uses the **Architect sub-agent** to perform a security and architectural review before the PR is even merged.
-
-### 3. STAR Resume Generator
-Using the **STAR (Situation, Task, Action, Result)** method, AXIOS-GO analyzes recent commit messages and repository activity to generate high-impact bullet points for professional resumes.
 
 ---
 
@@ -172,11 +170,11 @@ $$AxiosRating = (CF_{Rating} \times 0.5) + (CF_{Solved} \times 5) + (GH_{Repos} 
 ## 📂 Repository blueprint
 
 ### Backend (`/backend`)
-- **`/controllers`**: HTTP entry points for Auth, AI, CP, Dev, and ML wings.
-- **`/services`**: The core "brain"—includes Orchestrator, Multi-Provider routing, and GitHub/Codeforces integrators.
-- **`/workers`**: Background `robfig/cron` tasks and RabbitMQ consumers.
-- **`/models`**: GORM database schemas with automated migrations.
-- **`/utils`**: Shared logic for JWT, rating math, and response sanitization.
+- **`/app/api`**: FastAPI HTTP entry points for Auth, AI, CP, Dev, and ML wings.
+- **`/app/services`**: The core "brain"—includes Orchestrator, Multi-Provider routing, and GitHub/Codeforces integrators.
+- **`/app/tasks`**: Background Celery workers and Beat schedules for CF Sync and Ratings.
+- **`/app/models`**: SQLAlchemy 2.0 ORM models.
+- **`/alembic`**: Database migration scripts.
 
 ### Frontend (`/frontend`)
 - **`/src/components/wings`**: Specialized UI for each domain (CPWing, DevWing, MLWing).
@@ -187,10 +185,10 @@ $$AxiosRating = (CF_{Rating} \times 0.5) + (CF_{Solved} \times 5) + (GH_{Repos} 
 
 ## 🛠️ Infrastructure Stack
 
-- **Primary DB**: PostgreSQL (Relational data persistence).
-- **Messaging**: RabbitMQ (Task queue for background sync).
-- **Cache**: Redis (Fast state caching and session management).
-- **Orchestration**: Docker Compose (Local infrastructure containerization).
+- **Primary DB**: PostgreSQL (Relational data persistence via asyncpg).
+- **Messaging**: RabbitMQ (Task broker for Celery).
+- **Cache**: Redis (Fast state caching and rate limiting).
+- **Web Framework**: FastAPI (High-performance async Python backend).
 
 ---
 
@@ -210,4 +208,4 @@ A user requests a roadmap for "Frontend + ML". The **Orchestrator** generates a 
 - **Persona**: The AI behaves as an elite technical mentor—concise, encouraging, and logic-focused.
 
 ---
-© 2025 AXIOS Technical Nexus. PHASE 1 ONLINE.
+© 2026 AXIOS Technical Nexus. PHASE 2 (STRATA) ONLINE.
