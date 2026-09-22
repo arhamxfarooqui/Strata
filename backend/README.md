@@ -1,6 +1,6 @@
 # Strata — AI Tutoring Platform Backend
 
-> Rebuilt from AXIOS-GO. Same philosophy, Python-native architecture.
+> Same philosophy, Python-native architecture.
 
 Strata is an AI-powered tutoring platform for competitive programmers (and beyond) that tracks per-user skill gaps and serves targeted conceptual hints — never raw solutions.
 
